@@ -5,8 +5,6 @@ import { portfolioContext } from "@/lib/context";
 export async function POST(req: NextRequest) {
   try {
     const apiKey = process.env.ANTHROPIC_API_KEY;
-    console.log("API key present:", !!apiKey);
-    console.log("API key prefix:", apiKey ? apiKey.slice(0, 10) : "MISSING");
 
     if (!apiKey) {
       return NextResponse.json({ message: "API key not configured." }, { status: 500 });
@@ -32,7 +30,6 @@ Keep answers conversational and concise - 2 to 4 sentences unless the question r
 
     return NextResponse.json({ message: text });
   } catch (error) {
-    console.error("API error:", error);
     return NextResponse.json({ message: "Something went wrong. Please try again." }, { status: 500 });
   }
 }

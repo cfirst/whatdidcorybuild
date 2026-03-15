@@ -1,5 +1,6 @@
 import Hero from "@/components/Hero";
 import RoleScroll from "@/components/RoleScroll";
+import BuiltWithAI from "@/components/BuiltWithAI";
 import Contact from "@/components/Contact";
 
 export default function Home() {
@@ -7,8 +8,8 @@ export default function Home() {
     <main className="bg-white text-gray-900 font-sans">
       <Hero />
       <RoleScroll />
+      <BuiltWithAI />
       <Contact />
     </main>
   );
 }
-
