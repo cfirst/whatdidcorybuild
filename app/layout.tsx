@@ -1,5 +1,17 @@
 import type { Metadata } from "next";
+import { DM_Sans, Fraunces } from "next/font/google";
 import "./globals.css";
+
+const dmSans = DM_Sans({
+  subsets: ["latin"],
+  variable: "--font-dm-sans",
+});
+
+const fraunces = Fraunces({
+  subsets: ["latin"],
+  variable: "--font-fraunces",
+  weight: ["700"],
+});
 
 export const metadata: Metadata = {
   title: "Cory Firstenberg — PM & Builder",
@@ -18,7 +30,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body className={`${dmSans.variable} ${fraunces.variable}`}>{children}</body>
     </html>
   );
 }
