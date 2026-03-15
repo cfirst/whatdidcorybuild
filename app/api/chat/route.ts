@@ -1,29 +1,44 @@
 import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
-import { Redis } from "@upstash/redis";
 import { portfolioContext } from "@/lib/context";
 
-const redis = new Redis({
-  url: process.env.UPSTASH_REDIS_REST_URL!,
-  token: process.env.UPSTASH_REDIS_REST_TOKEN!,
-});
-
+const MAX_INPUT_LENGTH = 500;
 const RATE_LIMIT = 10;
 const WINDOW_SECONDS = 60 * 60;
-const MAX_INPUT_LENGTH = 500;
+
+async function checkRateLimit(ip: string): Promise<boolean> {
+  if (process.env.NODE_ENV === "development") return true;
+
+  try {
+    const url = process.env.UPSTASH_REDIS_REST_URL;
+    const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+
+    if (!url || !token) return true;
+
+    const key = `ratelimit:${ip}`;
+    const incrRes = await fetch(`${url}/incr/${key}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const { result: count } = await incrRes.json();
+
+    if (count === 1) {
+      await fetch(`${url}/expire/${key}/${WINDOW_SECONDS}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+    }
+
+    return count <= RATE_LIMIT;
+  } catch {
+    return true;
+  }
+}
 
 export async function POST(req: NextRequest) {
   try {
     const ip = req.headers.get("x-forwarded-for") ?? "anonymous";
-    const key = `ratelimit:${ip}`;
+    const allowed = await checkRateLimit(ip);
 
-    const requests = await redis.incr(key);
-
-    if (requests === 1) {
-      await redis.expire(key, WINDOW_SECONDS);
-    }
-
-    if (requests > RATE_LIMIT) {
+    if (!allowed) {
       return NextResponse.json(
         { message: "You have reached the limit of 10 questions per hour. Please check back later." },
         { status: 429 }
@@ -41,7 +56,6 @@ export async function POST(req: NextRequest) {
     }
 
     const apiKey = process.env.ANTHROPIC_API_KEY;
-
     if (!apiKey) {
       return NextResponse.json({ message: "API key not configured." }, { status: 500 });
     }
@@ -64,6 +78,7 @@ Keep answers conversational and concise - 2 to 4 sentences unless the question r
 
     return NextResponse.json({ message: text });
   } catch (error) {
+    console.error("API error:", error);
     return NextResponse.json({ message: "Something went wrong. Please try again." }, { status: 500 });
   }
 }
