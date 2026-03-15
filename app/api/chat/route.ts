@@ -14,10 +14,14 @@ const MAX_INPUT_LENGTH = 500;
 
 export async function POST(req: NextRequest) {
   try {
+    console.log("1. API route hit");
+
     const ip = req.headers.get("x-forwarded-for") ?? "anonymous";
     const key = `ratelimit:${ip}`;
+    console.log("2. IP:", ip);
 
     const requests = await redis.incr(key);
+    console.log("3. Request count:", requests);
 
     if (requests === 1) {
       await redis.expire(key, WINDOW_SECONDS);
@@ -31,6 +35,7 @@ export async function POST(req: NextRequest) {
     }
 
     const { messages } = await req.json();
+    console.log("4. Messages received");
 
     const lastMessage = messages[messages.length - 1];
     if (lastMessage?.content?.length > MAX_INPUT_LENGTH) {
@@ -41,12 +46,14 @@ export async function POST(req: NextRequest) {
     }
 
     const apiKey = process.env.ANTHROPIC_API_KEY;
+    console.log("5. API key present:", !!apiKey);
 
     if (!apiKey) {
       return NextResponse.json({ message: "API key not configured." }, { status: 500 });
     }
 
     const client = new Anthropic({ apiKey });
+    console.log("6. Anthropic client created");
 
     const stream = await client.messages.stream({
       model: "claude-sonnet-4-20250514",
@@ -59,11 +66,14 @@ Keep answers conversational and concise - 2 to 4 sentences unless the question r
       messages,
     });
 
+    console.log("7. Stream created");
     const response = await stream.finalMessage();
     const text = response.content[0].type === "text" ? response.content[0].text : "";
+    console.log("8. Response received");
 
     return NextResponse.json({ message: text });
   } catch (error) {
+    console.error("FULL ERROR:", error);
     return NextResponse.json({ message: "Something went wrong. Please try again." }, { status: 500 });
   }
 }
