@@ -4,11 +4,17 @@ import { portfolioContext } from "@/lib/context";
 
 export async function POST(req: NextRequest) {
   try {
+    const apiKey = process.env.ANTHROPIC_API_KEY;
+    console.log("API key present:", !!apiKey);
+    console.log("API key prefix:", apiKey ? apiKey.slice(0, 10) : "MISSING");
+
+    if (!apiKey) {
+      return NextResponse.json({ message: "API key not configured." }, { status: 500 });
+    }
+
     const { messages } = await req.json();
 
-    const client = new Anthropic({
-      apiKey: process.env.ANTHROPIC_API_KEY,
-    });
+    const client = new Anthropic({ apiKey });
 
     const stream = await client.messages.stream({
       model: "claude-sonnet-4-20250514",
