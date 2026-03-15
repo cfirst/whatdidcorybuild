@@ -10,7 +10,6 @@ type Message = {
 
 const suggested = [
   "What are you most proud of?",
-  "How do you approach prioritization?",
   "What is your AI experience?",
   "What are you looking for next?",
 ];
