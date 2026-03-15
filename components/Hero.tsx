@@ -28,7 +28,7 @@ export default function Hero() {
           </div>
           <div>
             <p className="text-[10px] tracking-[0.1em] uppercase text-[#6b6455] mb-1">revenue generated</p>
-            <p className="font-display text-[30px] font-bold text-[#c4956a] leading-none">$800K</p>
+            <p className="font-display text-[30px] font-bold text-[#c4956a] leading-none">$x00K</p>
           </div>
           <div>
             <p className="text-[10px] tracking-[0.1em] uppercase text-[#6b6455] mb-1">subscribers in 90 days</p>
