@@ -10,6 +10,7 @@ export default function Nav() {
       </span>
       <div className="flex gap-7">
         <Link href="#work" className="text-[11px] tracking-[0.1em] uppercase text-[#6b6455] hover:text-[#c4b89a] transition-colors">Work</Link>
+        <Link href="/case-study" className="text-[11px] tracking-[0.1em] uppercase text-[#6b6455] hover:text-[#c4b89a] transition-colors">Case Studies</Link>
         <Link href="/chat" className="text-[11px] tracking-[0.1em] uppercase text-[#6b6455] hover:text-[#c4b89a] transition-colors">Chat</Link>
         <Link href="#contact" className="text-[11px] tracking-[0.1em] uppercase text-[#6b6455] hover:text-[#c4b89a] transition-colors">Contact</Link>
       </div>
