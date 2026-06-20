@@ -69,9 +69,7 @@ function WineContent() {
             
               href="/api/spotify/login"
               className="inline-flex items-center gap-3 px-8 py-4 rounded-full text-sm font-medium transition-all hover:scale-105"
-              style={{ background: '#8fba9a', color: '#2c2a24', letterSpacing: '0.02em' }}
-            >
-              ♫
+              style={{ background: '#8fba9a', color: '#2c2a24', letterSpacing: '0.02em' }}>
               Connect Spotify
             </a>
             <p className="mt-6 text-xs" style={{ color: 'rgba(255,255,255,0.2)' }}>
