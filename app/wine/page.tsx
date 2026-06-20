@@ -67,12 +67,7 @@ function WineContent() {
               Connect Spotify and we will pair your current album with the perfect bottle.
             </p>
             
-              href="/api/spotify/login"
-              className="inline-flex items-center gap-3 px-8 py-4 rounded-full text-sm font-medium"
-              style={{ background: '#8fba9a', color: '#2c2a24' }}
-              >
-              Connect Spotify
-            </a>
+            <a href="/api/spotify/login" className="inline-flex items-center gap-3 px-8 py-4 rounded-full text-sm font-medium" style={{ background: '#8fba9a', color: '#2c2a24' }}>Connect Spotify</a>
             <p className="mt-6 text-xs" style={{ color: 'rgba(255,255,255,0.2)' }}>
               We read your current track only. Nothing is stored.
             </p>
@@ -122,4 +117,62 @@ function WineContent() {
                 </div>
               )}
               <div>
-                <p className="text-xs uppercase
+                <p className="text-xs uppercase tracking-widest mb-1" style={{ color: '#8fba9a' }}>Now listening</p>
+                <p className="text-xl" style={{ fontFamily: 'Fraunces, serif', color: '#f5f0e8', fontWeight: 300 }}>{album}</p>
+                <p className="text-sm" style={{ color: 'rgba(255,255,255,0.45)' }}>{artist}</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-4 mb-12">
+              <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.08)' }} />
+              <span className="text-xs uppercase tracking-widest" style={{ color: '#c4956a' }}>pairs with</span>
+              <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.08)' }} />
+            </div>
+
+            <div className="rounded-2xl p-8" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
+              <div className="flex items-start justify-between gap-4 mb-6">
+                <div>
+                  <p className="text-xs uppercase tracking-widest mb-2" style={{ color: '#9a8fc4' }}>{wine.type}</p>
+                  <h2 className="text-3xl" style={{ fontFamily: 'Fraunces, serif', color: '#f5f0e8', fontWeight: 300, lineHeight: 1.2 }}>
+                    {wine.wine}
+                  </h2>
+                </div>
+                <span className="text-xs px-3 py-1 rounded-full flex-shrink-0 mt-1" style={{ background: 'rgba(196,149,106,0.15)', color: '#c4956a', border: '1px solid rgba(196,149,106,0.2)' }}>
+                  {wine.vibe}
+                </span>
+              </div>
+              <p className="text-base mb-6 leading-relaxed" style={{ color: 'rgba(255,255,255,0.65)' }}>
+                {wine.reason}
+              </p>
+              <div className="pt-6" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                <p className="text-xs uppercase tracking-widest mb-2" style={{ color: 'rgba(255,255,255,0.25)' }}>Serving note</p>
+                <p className="text-sm" style={{ color: 'rgba(255,255,255,0.45)' }}>{wine.serving}</p>
+              </div>
+            </div>
+
+            <div className="text-center mt-12">
+              <a href="/api/spotify/login" className="text-sm" style={{ color: '#8fba9a' }}>
+                Refresh from Spotify
+              </a>
+            </div>
+          </div>
+        )}
+
+        {error && (
+          <div className="text-center">
+            <p style={{ color: 'rgba(255,255,255,0.4)' }}>{error}</p>
+            <a href="/wine" className="text-sm underline mt-4 block" style={{ color: '#8fba9a' }}>Start over</a>
+          </div>
+        )}
+      </div>
+    </main>
+  )
+}
+
+export default function WinePage() {
+  return (
+    <Suspense>
+      <WineContent />
+    </Suspense>
+  )
+}
