@@ -105,13 +105,14 @@ function WineContent() {
   }, [album, artist, track])
 
   function handlePlaylistSelect(p: Playlist) {
-    console.log('Playlist selected:', p.name, 'token:', token)
+    console.log('Playlist selected:', p.name)
     setSelectedPlaylist(p)
     setLoading(true)
     setError(null)
     fetch(`/api/spotify/playlists?token=${encodeURIComponent(token!)}&playlistId=${p.id}`)
       .then((r) => r.json())
       .then((data) => {
+        console.log('Tracks response:', data)
         if (!data.tracks) throw new Error('No tracks')
         return fetch('/api/wine', {
           method: 'POST',
@@ -121,10 +122,14 @@ function WineContent() {
       })
       .then((r) => r.json())
       .then((data) => {
+        console.log('Wine response:', data)
         if (data.error) setError(data.error)
         else setPlaylist(data)
       })
-      .catch(() => setError('Something went wrong.'))
+      .catch((err) => {
+        console.log('Error:', err)
+        setError('Something went wrong.')
+      })
       .finally(() => setLoading(false))
   }
 
