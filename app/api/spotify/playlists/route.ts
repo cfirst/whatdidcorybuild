@@ -30,7 +30,8 @@ export async function GET(req: NextRequest) {
     headers: { Authorization: `Bearer ${decodedToken}` },
   })
   const data = await res.json()
-  console.log('Playlists response:', JSON.stringify(data).slice(0, 200))
+  console.log('Playlists raw:', JSON.stringify(data))
+  return NextResponse.json({ debug: data })
 
   if (data.error) {
     return NextResponse.json({ error: data.error.message }, { status: data.error.status })
