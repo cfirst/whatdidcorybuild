@@ -30,51 +30,6 @@ export async function GET(req: NextRequest) {
     return NextResponse.redirect(new URL('/wine?error=token_failed', req.url))
   }
 
-  const nowRes = await fetch('https://api.spotify.com/v1/me/player/currently-playing', {
-    headers: { Authorization: `Bearer ${tokenData.access_token}` },
-  })
-
-  let album = null
-
-  if (nowRes.status === 200) {
-    const nowData = await nowRes.json()
-    if (nowData?.item?.album) {
-      album = {
-        name: nowData.item.album.name,
-        artist: nowData.item.album.artists[0]?.name,
-        image: nowData.item.album.images[0]?.url,
-        track: nowData.item.name,
-      }
-    }
-  }
-
-  if (!album) {
-    const recentRes = await fetch('https://api.spotify.com/v1/me/player/recently-played?limit=1', {
-      headers: { Authorization: `Bearer ${tokenData.access_token}` },
-    })
-    const recentData = await recentRes.json()
-    const item = recentData?.items?.[0]?.track
-
-    if (item?.album) {
-      album = {
-        name: item.album.name,
-        artist: item.album.artists[0]?.name,
-        image: item.album.images[0]?.url,
-        track: item.name,
-      }
-    }
-  }
-
-  if (!album) {
-    return NextResponse.redirect(new URL('/wine?error=no_album', req.url))
-  }
-
-  const params = new URLSearchParams({
-    album: album.name,
-    artist: album.artist,
-    track: album.track,
-    image: album.image,
-  })
-
+  const params = new URLSearchParams({ token: tokenData.access_token })
   return NextResponse.redirect(new URL(`/wine?${params.toString()}`, req.url))
 }
