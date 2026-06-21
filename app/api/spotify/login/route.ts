@@ -4,8 +4,7 @@ export async function GET() {
   const clientId = process.env.SPOTIFY_CLIENT_ID!
   const redirectUri = process.env.SPOTIFY_REDIRECT_URI!
 
-  const scope = 'user-read-currently-playing user-read-recently-played playlist-read-private playlist-read-collaborative'
-
+const scope = 'user-read-currently-playing user-read-recently-played playlist-read-private playlist-read-collaborative user-library-read'
   const params = new URLSearchParams({
     client_id: clientId,
     response_type: 'code',
