@@ -225,7 +225,7 @@ function WineContent() {
             <div className="flex flex-col gap-3">
               {playlists.map((p) => (
                 <button key={p.id} onClick={() => handlePlaylistSelect(p)} className="flex items-center gap-4 p-4 rounded-xl text-left transition-all hover:scale-105" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
-                  {p.image && (
+                 {p.image && p.image.startsWith('http') && (
                     <div className="relative w-12 h-12 rounded-lg overflow-hidden flex-shrink-0">
                       <Image src={p.image} alt={p.name} fill style={{ objectFit: 'cover' }} />
                     </div>
