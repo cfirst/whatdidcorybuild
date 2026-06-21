@@ -86,24 +86,32 @@ function WineContent() {
   }, [token])
 
   useEffect(() => {
-    if (album && artist) {
+    if (token) {
       setMode('music-to-wine')
       setLoading(true)
-      fetch('/api/wine', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ album, artist, track, mode: 'music-to-wine' }),
-      })
+      fetch(`/api/spotify/playlists?token=${encodeURIComponent(token)}`)
         .then((r) => r.json())
         .then((data) => {
+          if (data.error) {
+            setError(data.error)
+            return
+          }
+          return fetch('/api/wine', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ mode: 'playlist', tracks: data.tracks, playlistName: 'Liked Songs' }),
+          })
+        })
+        .then((r) => r?.json())
+        .then((data) => {
+          if (!data) return
           if (data.error) setError(data.error)
-          else setWine(data)
+          else setPlaylist(data)
         })
         .catch(() => setError('Something went wrong.'))
         .finally(() => setLoading(false))
     }
-  }, [album, artist, track])
-
+  }, [token])
   function handlePlaylistSelect(p: Playlist) {
     console.log('Playlist selected:', p.name)
     setSelectedPlaylist(p)
