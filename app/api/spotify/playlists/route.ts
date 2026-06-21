@@ -42,12 +42,15 @@ export async function GET(req: NextRequest) {
 
   const playlists = data.items
     ?.filter((p: any) => p && p.name)
-    .map((p: any) => ({
-      id: p.id,
-      name: p.name,
-      count: p.items?.total ?? 0,
-      image: p.images?.[0]?.url ?? null,
-    }))
+   .map((p: any) => {
+      const total = p?.tracks?.total ?? p?.items?.total ?? 0
+      return {
+        id: p.id,
+        name: p.name,
+        count: total,
+        image: p.images?.[0]?.url ?? null,
+      }
+    })
 
   return NextResponse.json({ playlists })
 }
