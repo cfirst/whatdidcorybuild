@@ -8,12 +8,15 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Missing token' }, { status: 400 })
   }
 
-  // Fetch tracks from a specific playlist
+  const decodedToken = decodeURIComponent(token)
+
   if (playlistId) {
-    const res = await fetch(`https://api.spotify.com/v1/playlists/${playlistId}/tracks?limit=20&fields=items(track(name,artists))`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
+    const res = await fetch(
+      `https://api.spotify.com/v1/playlists/${playlistId}/tracks?limit=20&fields=items(track(name,artists))`,
+      { headers: { Authorization: `Bearer ${decodedToken}` } }
+    )
     const data = await res.json()
+    console.log('Playlist tracks response:', JSON.stringify(data).slice(0, 200))
     const tracks = data.items
       ?.filter((item: any) => item.track)
       .map((item: any) => ({
@@ -23,11 +26,16 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ tracks })
   }
 
-  // Fetch user's saved playlists
   const res = await fetch('https://api.spotify.com/v1/me/playlists?limit=20', {
-    headers: { Authorization: `Bearer ${token}` },
+    headers: { Authorization: `Bearer ${decodedToken}` },
   })
   const data = await res.json()
+  console.log('Playlists response:', JSON.stringify(data).slice(0, 200))
+
+  if (data.error) {
+    return NextResponse.json({ error: data.error.message }, { status: data.error.status })
+  }
+
   const playlists = data.items?.map((p: any) => ({
     id: p.id,
     name: p.name,
