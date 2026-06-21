@@ -19,8 +19,9 @@ export async function GET(req: NextRequest) {
     const res = await fetch(
 `https://api.spotify.com/v1/playlists/${playlistId}/tracks?limit=20`,      { headers: { Authorization: `Bearer ${decodedToken}` } }
     )
-    const data = await res.json()
-    console.log('Tracks from Spotify:', JSON.stringify(data).slice(0, 300))
+   const data = await res.json()
+    console.log('Tracks status:', res.status)
+    console.log('Tracks data:', JSON.stringify(data))
     const tracks = data.items
       ?.filter((item: any) => item.track)
       .map((item: any) => ({
