@@ -36,40 +36,28 @@ interface PlaylistSuggestion {
   wines: PlaylistWine[]
 }
 
-interface Playlist {
-  id: string
-  name: string
-  count: number
-  image: string
-}
-
 function WineContent() {
   const searchParams = useSearchParams()
   const [mode, setMode] = useState<'choose' | 'music-to-wine' | 'wine-to-music'>('choose')
   const [wine, setWine] = useState<WineSuggestion | null>(null)
   const [music, setMusic] = useState<MusicSuggestion | null>(null)
   const [playlist, setPlaylist] = useState<PlaylistSuggestion | null>(null)
-  const [playlists, setPlaylists] = useState<Playlist[]>([])
-  const [selectedPlaylist, setSelectedPlaylist] = useState<Playlist | null>(null)
   const [wineInput, setWineInput] = useState('')
   const [loading, setLoading] = useState(false)
-  const [loadingPlaylists, setLoadingPlaylists] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const rawToken = searchParams.get('token')
   const [token, setToken] = useState<string | null>(null)
-
-  useEffect(() => {
-    if (rawToken) {
-      setToken(decodeURIComponent(rawToken))
-    }
-  }, [rawToken])
   const album = searchParams.get('album')
   const artist = searchParams.get('artist')
   const track = searchParams.get('track')
   const image = searchParams.get('image')
   const errorParam = searchParams.get('error')
-  
+
+  useEffect(() => {
+    if (rawToken) setToken(decodeURIComponent(rawToken))
+  }, [rawToken])
+
   useEffect(() => {
     if (token) {
       setMode('music-to-wine')
@@ -79,12 +67,12 @@ function WineContent() {
         .then((data) => {
           if (data.error) {
             setError(data.error)
-            return
+            return null
           }
           return fetch('/api/wine', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ mode: 'playlist', tracks: data.tracks, playlistName: 'Liked Songs' }),
+            body: JSON.stringify({ mode: 'playlist', tracks: data.tracks }),
           })
         })
         .then((r) => r?.json())
@@ -97,34 +85,25 @@ function WineContent() {
         .finally(() => setLoading(false))
     }
   }, [token])
-  function handlePlaylistSelect(p: Playlist) {
-    console.log('Playlist selected:', p.name)
-    setSelectedPlaylist(p)
-    setLoading(true)
-    setError(null)
-    fetch(`/api/spotify/playlists?token=${encodeURIComponent(token!)}&playlistId=${p.id}`)
-      .then((r) => r.json())
-      .then((data) => {
-        console.log('Tracks response:', data)
-        if (!data.tracks) throw new Error('No tracks')
-        return fetch('/api/wine', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ mode: 'playlist', tracks: data.tracks, playlistName: p.name }),
+
+  useEffect(() => {
+    if (album && artist) {
+      setMode('music-to-wine')
+      setLoading(true)
+      fetch('/api/wine', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ album, artist, track, mode: 'music-to-wine' }),
+      })
+        .then((r) => r.json())
+        .then((data) => {
+          if (data.error) setError(data.error)
+          else setWine(data)
         })
-      })
-      .then((r) => r.json())
-      .then((data) => {
-        console.log('Wine response:', data)
-        if (data.error) setError(data.error)
-        else setPlaylist(data)
-      })
-      .catch((err) => {
-        console.log('Error:', err)
-        setError('Something went wrong.')
-      })
-      .finally(() => setLoading(false))
-  }
+        .catch(() => setError('Something went wrong.'))
+        .finally(() => setLoading(false))
+    }
+  }, [album, artist, track])
 
   function handleWineSubmit() {
     if (!wineInput.trim()) return
@@ -150,8 +129,6 @@ function WineContent() {
     setWine(null)
     setMusic(null)
     setPlaylist(null)
-    setPlaylists([])
-    setSelectedPlaylist(null)
     setWineInput('')
     setError(null)
   }
@@ -177,7 +154,7 @@ function WineContent() {
               <button onClick={() => setMode('music-to-wine')} className="text-left p-8 rounded-2xl transition-all hover:scale-105" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
                 <p className="text-xs uppercase tracking-widest mb-3" style={{ color: '#8fba9a' }}>I have music</p>
                 <p className="text-xl mb-3" style={{ fontFamily: 'Fraunces, serif', color: '#f5f0e8', fontWeight: 300 }}>What wine should I drink?</p>
-                <p className="text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>Connect Spotify, pick a playlist, and we pair it with the perfect wines.</p>
+                <p className="text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>Connect Spotify and we pair your liked songs with the perfect wines.</p>
               </button>
               <button onClick={() => setMode('wine-to-music')} className="text-left p-8 rounded-2xl transition-all hover:scale-105" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
                 <p className="text-xs uppercase tracking-widest mb-3" style={{ color: '#c4956a' }}>I have wine</p>
@@ -192,49 +169,15 @@ function WineContent() {
           <div className="text-center">
             <button onClick={() => setMode('choose')} className="text-xs mb-12 block mx-auto" style={{ color: 'rgba(255,255,255,0.3)' }}>Back</button>
             <p className="text-xs uppercase tracking-widest mb-6" style={{ color: '#8fba9a' }}>Music to wine</p>
-            <h2 className="text-4xl mb-6" style={{ fontFamily: 'Fraunces, serif', color: '#f5f0e8', fontWeight: 300, lineHeight: 1.2 }}>Pick a playlist.</h2>
-            <p className="mb-12 text-lg" style={{ color: 'rgba(255,255,255,0.45)' }}>Connect Spotify and choose a playlist to pair with wine.</p>
+            <h2 className="text-4xl mb-6" style={{ fontFamily: 'Fraunces, serif', color: '#f5f0e8', fontWeight: 300, lineHeight: 1.2 }}>What are you listening to?</h2>
+            <p className="mb-12 text-lg" style={{ color: 'rgba(255,255,255,0.45)' }}>Connect Spotify and we will pair your liked songs with the perfect wines.</p>
             <a href="/api/spotify/login" className="inline-flex items-center gap-3 px-8 py-4 rounded-full text-sm font-medium" style={{ background: '#8fba9a', color: '#2c2a24' }}>Connect Spotify</a>
-            <p className="mt-6 text-xs" style={{ color: 'rgba(255,255,255,0.2)' }}>We read your playlists only. Nothing is stored.</p>
-          </div>
-        )}
-
-        {loadingPlaylists && (
-          <div className="text-center">
-            <div className="flex items-center justify-center gap-2 mb-4">
-              <div className="w-2 h-2 rounded-full animate-bounce" style={{ background: '#8fba9a', animationDelay: '0ms' }} />
-              <div className="w-2 h-2 rounded-full animate-bounce" style={{ background: '#8fba9a', animationDelay: '150ms' }} />
-              <div className="w-2 h-2 rounded-full animate-bounce" style={{ background: '#8fba9a', animationDelay: '300ms' }} />
-            </div>
-            <p className="text-sm" style={{ color: 'rgba(255,255,255,0.3)' }}>Loading your playlists...</p>
-          </div>
-        )}
-
-        {token && playlists.length > 0 && !playlist && !loading && (
-          <div>
-            <button onClick={reset} className="text-xs mb-8 block" style={{ color: 'rgba(255,255,255,0.3)' }}>Back</button>
-            <p className="text-xs uppercase tracking-widest mb-3" style={{ color: '#8fba9a' }}>Choose a playlist</p>
-            <h2 className="text-3xl mb-10" style={{ fontFamily: 'Fraunces, serif', color: '#f5f0e8', fontWeight: 300 }}>Which one are you in the mood for?</h2>
-            <div className="flex flex-col gap-3">
-              {playlists.map((p) => (
-               <button key={p.id} onClick={() => handlePlaylistSelect(p)} className="flex items-center gap-4 p-4 rounded-xl text-left transition-all hover:scale-105" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
-                  <div>
-                    <p className="text-sm font-medium" style={{ color: '#f5f0e8' }}>{p.name}</p>
-                    <p className="text-xs" style={{ color: 'rgba(255,255,255,0.3)' }}>{p.count} tracks</p>
-                  </div>
-                </button>
-              ))}
-            </div>
+            <p className="mt-6 text-xs" style={{ color: 'rgba(255,255,255,0.2)' }}>We read your liked songs only. Nothing is stored.</p>
           </div>
         )}
 
         {loading && (
           <div className="text-center">
-            {selectedPlaylist?.image && (
-              <div className="relative w-32 h-32 mx-auto mb-6 rounded-lg overflow-hidden" style={{ opacity: 0.7 }}>
-                <Image src={selectedPlaylist.image} alt={selectedPlaylist.name} fill style={{ objectFit: 'cover' }} />
-              </div>
-            )}
             <div className="flex items-center justify-center gap-2 mb-4">
               <div className="w-2 h-2 rounded-full animate-bounce" style={{ background: '#c4956a', animationDelay: '0ms' }} />
               <div className="w-2 h-2 rounded-full animate-bounce" style={{ background: '#c4956a', animationDelay: '150ms' }} />
@@ -261,17 +204,15 @@ function WineContent() {
           </div>
         )}
 
-        {playlist && selectedPlaylist && !loading && (
+        {playlist && !loading && (
           <div>
             <div className="flex items-center gap-4 mb-10">
-              {selectedPlaylist.image && (
-                <div className="relative w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
-                  <Image src={selectedPlaylist.image} alt={selectedPlaylist.name} fill style={{ objectFit: 'cover' }} />
-                </div>
-              )}
+              <div className="w-16 h-16 rounded-lg flex-shrink-0 flex items-center justify-center" style={{ background: 'rgba(143,186,154,0.15)' }}>
+                <span style={{ fontSize: 28 }}>♫</span>
+              </div>
               <div>
                 <p className="text-xs uppercase tracking-widest mb-1" style={{ color: '#8fba9a' }}>Pairing for</p>
-                <p className="text-2xl" style={{ fontFamily: 'Fraunces, serif', color: '#f5f0e8', fontWeight: 300 }}>{selectedPlaylist.name}</p>
+                <p className="text-2xl" style={{ fontFamily: 'Fraunces, serif', color: '#f5f0e8', fontWeight: 300 }}>Your Liked Songs</p>
               </div>
             </div>
             <p className="mb-10 text-base leading-relaxed" style={{ color: 'rgba(255,255,255,0.5)' }}>{playlist.playlistVibe}</p>
@@ -291,7 +232,6 @@ function WineContent() {
               ))}
             </div>
             <div className="text-center mt-12">
-              <button onClick={() => { setPlaylist(null); setSelectedPlaylist(null); }} className="text-sm mr-6" style={{ color: 'rgba(255,255,255,0.3)' }}>Pick another playlist</button>
               <button onClick={reset} className="text-sm" style={{ color: '#8fba9a' }}>Start over</button>
             </div>
           </div>
@@ -331,8 +271,7 @@ function WineContent() {
               </div>
             </div>
             <div className="text-center mt-12">
-              <button onClick={reset} className="text-sm mr-6" style={{ color: 'rgba(255,255,255,0.3)' }}>Start over</button>
-              <a href="/api/spotify/login" className="text-sm" style={{ color: '#8fba9a' }}>Refresh from Spotify</a>
+              <button onClick={reset} className="text-sm" style={{ color: '#8fba9a' }}>Start over</button>
             </div>
           </div>
         )}
@@ -398,7 +337,7 @@ function WineContent() {
   )
 }
 
-export default function WinePage() {
+export default function WineContent_Wrapper() {
   return (
     <Suspense>
       <WineContent />
