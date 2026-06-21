@@ -11,7 +11,7 @@ export async function POST(req: NextRequest) {
   }
 
   const message = await client.messages.create({
-    model: 'claude-sonnet-4-20250514',
+    model: 'claude-sonnet-4-6',
     max_tokens: 512,
     messages: [
       {
@@ -37,9 +37,11 @@ Respond in this exact JSON format with no additional text:
   const text = message.content[0].type === 'text' ? message.content[0].text : ''
 
   try {
-    const json = JSON.parse(text)
+    const clean = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
+    const json = JSON.parse(clean)
     return NextResponse.json(json)
   } catch {
+    console.log('Failed to parse:', text)
     return NextResponse.json({ error: 'Failed to parse wine suggestion' }, { status: 500 })
   }
 }
