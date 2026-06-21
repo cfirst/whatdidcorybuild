@@ -45,6 +45,7 @@ function WineContent() {
   const [wineInput, setWineInput] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [activeYoutube, setActiveYoutube] = useState<string | null>(null)
 
   const rawToken = searchParams.get('token')
   const [token, setToken] = useState<string | null>(null)
@@ -65,10 +66,7 @@ function WineContent() {
       fetch(`/api/spotify/playlists?token=${encodeURIComponent(token)}`)
         .then((r) => r.json())
         .then((data) => {
-          if (data.error) {
-            setError(data.error)
-            return null
-          }
+          if (data.error) { setError(data.error); return null }
           return fetch('/api/wine', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -131,17 +129,14 @@ function WineContent() {
     setPlaylist(null)
     setWineInput('')
     setError(null)
+    setActiveYoutube(null)
   }
 
   return (
     <main className="min-h-screen" style={{ background: '#2c2a24', fontFamily: 'DM Sans, sans-serif' }}>
       <nav className="flex items-center justify-between px-8 py-6 border-b" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
-        <Link href="/" className="text-sm" style={{ color: '#8fba9a', letterSpacing: '0.05em' }}>
-          Back to Cory Firstenberg
-        </Link>
-        <span className="text-xs uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.3)' }}>
-          Wine & Music
-        </span>
+        <Link href="/" className="text-sm" style={{ color: '#8fba9a', letterSpacing: '0.05em' }}>Back to Cory Firstenberg</Link>
+        <span className="text-xs uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.3)' }}>Wine & Music</span>
       </nav>
 
       <div className="max-w-2xl mx-auto px-8 py-20">
@@ -299,23 +294,15 @@ function WineContent() {
               <p className="text-base mb-8 leading-relaxed" style={{ color: 'rgba(255,255,255,0.65)' }}>{music.reason}</p>
               <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }} className="pt-6">
                 <p className="text-xs uppercase tracking-widest mb-4" style={{ color: 'rgba(255,255,255,0.25)' }}>Songs to start with</p>
-                <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-3">
                   {music.songs.map((song, i) => (
-                    <div key={i}>
-                      <p className="text-sm mb-2" style={{ color: 'rgba(255,255,255,0.5)' }}>
-                        <span className="mr-2" style={{ color: 'rgba(255,255,255,0.2)' }}>{i + 1}</span>
-                        {song.title}
-                      </p>
-                      <div className="rounded-xl overflow-hidden" style={{ border: '1px solid rgba(255,255,255,0.06)' }}>
-                        <iframe
-                          width="100%"
-                          height="120"
-                          src={`https://www.youtube.com/embed?listType=search&list=${encodeURIComponent(`${music.artist} ${song.title}`)}`}
-                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                          allowFullScreen
-                        />
+                    <button key={i} onClick={() => setActiveYoutube(song.youtube)} className="flex items-center justify-between px-4 py-3 rounded-xl transition-all hover:scale-105 text-left w-full" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                      <div className="flex items-center gap-3">
+                        <span className="text-xs" style={{ color: 'rgba(255,255,255,0.2)' }}>{i + 1}</span>
+                        <span className="text-sm" style={{ color: '#f5f0e8' }}>{song.title}</span>
                       </div>
-                    </div>
+                      <span className="text-xs px-2 py-1 rounded" style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.4)' }}>▶ Play</span>
+                    </button>
                   ))}
                 </div>
               </div>
@@ -341,11 +328,29 @@ function WineContent() {
         )}
 
       </div>
+
+      {activeYoutube && (
+        <div onClick={() => setActiveYoutube(null)} className="fixed inset-0 flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.85)', zIndex: 50 }}>
+          <div onClick={(e) => e.stopPropagation()} className="w-full max-w-lg mx-4 rounded-2xl overflow-hidden" style={{ background: '#2c2a24', border: '1px solid rgba(255,255,255,0.08)' }}>
+            <div className="flex justify-between items-center px-6 py-4">
+              <span className="text-xs uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.3)' }}>Search on YouTube</span>
+              <button onClick={() => setActiveYoutube(null)} className="text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>✕</button>
+            </div>
+            <div className="px-6 pb-8 text-center">
+              <p className="text-base mb-6" style={{ color: 'rgba(255,255,255,0.6)' }}>Open this song on YouTube to listen.</p>
+              <a href={activeYoutube} target="_blank" rel="noopener noreferrer" onClick={() => setActiveYoutube(null)} className="inline-flex items-center gap-2 px-8 py-4 rounded-full text-sm font-medium" style={{ background: '#c4956a', color: '#2c2a24' }}>
+                Open on YouTube →
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
+
     </main>
   )
 }
 
-export default function WineContent_Wrapper() {
+export default function WinePage() {
   return (
     <Suspense>
       <WineContent />
