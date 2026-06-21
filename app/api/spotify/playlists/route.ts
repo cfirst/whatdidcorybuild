@@ -16,7 +16,6 @@ export async function GET(req: NextRequest) {
       { headers: { Authorization: `Bearer ${decodedToken}` } }
     )
     const data = await res.json()
-    console.log('Playlist tracks response:', JSON.stringify(data).slice(0, 200))
     const tracks = data.items
       ?.filter((item: any) => item.track)
       .map((item: any) => ({
@@ -30,19 +29,17 @@ export async function GET(req: NextRequest) {
     headers: { Authorization: `Bearer ${decodedToken}` },
   })
   const data = await res.json()
-  console.log('Playlists raw:', JSON.stringify(data))
-  return NextResponse.json({ debug: data })
 
   if (data.error) {
     return NextResponse.json({ error: data.error.message }, { status: data.error.status })
   }
 
   const playlists = data.items
-    ?.filter((p: any) => p && p.tracks)
+    ?.filter((p: any) => p && p.name)
     .map((p: any) => ({
       id: p.id,
       name: p.name,
-      count: p.tracks?.total ?? 0,
+      count: p.items?.total ?? 0,
       image: p.images?.[0]?.url ?? null,
     }))
 
