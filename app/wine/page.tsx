@@ -69,22 +69,7 @@ function WineContent() {
   const track = searchParams.get('track')
   const image = searchParams.get('image')
   const errorParam = searchParams.get('error')
-
-  useEffect(() => {
-    if (token) {
-      setMode('music-to-wine')
-      setLoadingPlaylists(true)
-      fetch(`/api/spotify/playlists?token=${encodeURIComponent(token)}`)
-        .then((r) => r.json())
-        .then((data) => {
-          if (data.playlists) setPlaylists(data.playlists)
-          else setError('Could not load playlists.')
-        })
-        .catch(() => setError('Failed to load playlists.'))
-        .finally(() => setLoadingPlaylists(false))
-    }
-  }, [token])
-
+  
   useEffect(() => {
     if (token) {
       setMode('music-to-wine')
