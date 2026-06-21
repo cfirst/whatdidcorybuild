@@ -17,8 +17,7 @@ export async function GET(req: NextRequest) {
 
   if (playlistId) {
     const res = await fetch(
-      `https://api.spotify.com/v1/playlists/${playlistId}/tracks?limit=20&fields=items(track(name,artists))`,
-      { headers: { Authorization: `Bearer ${decodedToken}` } }
+`https://api.spotify.com/v1/playlists/${playlistId}/tracks?limit=20`,      { headers: { Authorization: `Bearer ${decodedToken}` } }
     )
     const data = await res.json()
     console.log('Tracks from Spotify:', JSON.stringify(data).slice(0, 300))
