@@ -105,6 +105,7 @@ function WineContent() {
   }, [album, artist, track])
 
   function handlePlaylistSelect(p: Playlist) {
+    console.log('Playlist selected:', p.name, 'token:', token)
     setSelectedPlaylist(p)
     setLoading(true)
     setError(null)
