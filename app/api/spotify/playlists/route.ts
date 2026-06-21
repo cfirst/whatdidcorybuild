@@ -8,7 +8,12 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Missing token' }, { status: 400 })
   }
 
-  const decodedToken = decodeURIComponent(token)
+  let decodedToken = token
+  try {
+    decodedToken = decodeURIComponent(token)
+  } catch {
+    decodedToken = token
+  }
 
   if (playlistId) {
     const res = await fetch(
@@ -16,6 +21,7 @@ export async function GET(req: NextRequest) {
       { headers: { Authorization: `Bearer ${decodedToken}` } }
     )
     const data = await res.json()
+    console.log('Tracks from Spotify:', JSON.stringify(data).slice(0, 300))
     const tracks = data.items
       ?.filter((item: any) => item.track)
       .map((item: any) => ({
