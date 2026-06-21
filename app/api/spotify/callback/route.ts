@@ -30,6 +30,6 @@ export async function GET(req: NextRequest) {
     return NextResponse.redirect(new URL('/wine?error=token_failed', req.url))
   }
 
-  const params = new URLSearchParams({ token: tokenData.access_token })
-  return NextResponse.redirect(new URL(`/wine?${params.toString()}`, req.url))
+  const params = new URLSearchParams({ token: encodeURIComponent(tokenData.access_token) })
+return NextResponse.redirect(new URL(`/wine?${params.toString()}`, req.url))
 }
