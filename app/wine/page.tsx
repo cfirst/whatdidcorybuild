@@ -299,15 +299,23 @@ function WineContent() {
               <p className="text-base mb-8 leading-relaxed" style={{ color: 'rgba(255,255,255,0.65)' }}>{music.reason}</p>
               <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }} className="pt-6">
                 <p className="text-xs uppercase tracking-widest mb-4" style={{ color: 'rgba(255,255,255,0.25)' }}>Songs to start with</p>
-                <div className="flex flex-col gap-3">
+                <div className="flex flex-col gap-4">
                   {music.songs.map((song, i) => (
-                    <a key={i} href={song.youtube} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between px-4 py-3 rounded-xl transition-all hover:scale-105" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}>
-                      <div className="flex items-center gap-3">
-                        <span className="text-xs" style={{ color: 'rgba(255,255,255,0.2)' }}>{i + 1}</span>
-                        <span className="text-sm" style={{ color: '#f5f0e8' }}>{song.title}</span>
+                    <div key={i}>
+                      <p className="text-sm mb-2" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                        <span className="mr-2" style={{ color: 'rgba(255,255,255,0.2)' }}>{i + 1}</span>
+                        {song.title}
+                      </p>
+                      <div className="rounded-xl overflow-hidden" style={{ border: '1px solid rgba(255,255,255,0.06)' }}>
+                        <iframe
+                          width="100%"
+                          height="120"
+                          src={`https://www.youtube.com/embed?listType=search&list=${encodeURIComponent(`${music.artist} ${song.title}`)}`}
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                        />
                       </div>
-                      <span className="text-xs px-2 py-1 rounded" style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.4)' }}>YouTube</span>
-                    </a>
+                    </div>
                   ))}
                 </div>
               </div>
