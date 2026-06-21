@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 
 export async function GET(req: NextRequest) {
   const token = req.nextUrl.searchParams.get('token')
-  const playlistId = req.nextUrl.searchParams.get('playlistId')
 
   if (!token) {
     return NextResponse.json({ error: 'Missing token' }, { status: 400 })
@@ -15,23 +14,7 @@ export async function GET(req: NextRequest) {
     decodedToken = token
   }
 
-  if (playlistId) {
-    const res = await fetch(
-`https://api.spotify.com/v1/playlists/${playlistId}/tracks?limit=20`,      { headers: { Authorization: `Bearer ${decodedToken}` } }
-    )
-   const data = await res.json()
-    console.log('Tracks status:', res.status)
-    console.log('Tracks data:', JSON.stringify(data))
-    const tracks = data.items
-      ?.filter((item: any) => item.track)
-      .map((item: any) => ({
-        name: item.track.name,
-        artist: item.track.artists[0]?.name,
-      }))
-    return NextResponse.json({ tracks })
-  }
-
-  const res = await fetch('https://api.spotify.com/v1/me/playlists?limit=20', {
+  const res = await fetch('https://api.spotify.com/v1/me/tracks?limit=20', {
     headers: { Authorization: `Bearer ${decodedToken}` },
   })
   const data = await res.json()
@@ -40,17 +23,13 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: data.error.message }, { status: data.error.status })
   }
 
-  const playlists = data.items
-    ?.filter((p: any) => p && p.name)
-   .map((p: any) => {
-      const total = p?.tracks?.total ?? p?.items?.total ?? 0
-      return {
-        id: p.id,
-        name: p.name,
-        count: total,
-        image: p.images?.[0]?.url ?? null,
-      }
-    })
+  const tracks = data.items
+    ?.filter((item: any) => item.track)
+    .map((item: any) => ({
+      name: item.track.name,
+      artist: item.track.artists[0]?.name,
+      album: item.track.album?.name,
+    }))
 
-  return NextResponse.json({ playlists })
+  return NextResponse.json({ tracks })
 }
