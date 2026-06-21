@@ -57,7 +57,13 @@ function WineContent() {
   const [error, setError] = useState<string | null>(null)
 
   const rawToken = searchParams.get('token')
-  const token = rawToken ? decodeURIComponent(rawToken) : null
+  const [token, setToken] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (rawToken) {
+      setToken(decodeURIComponent(rawToken))
+    }
+  }, [rawToken])
   const album = searchParams.get('album')
   const artist = searchParams.get('artist')
   const track = searchParams.get('track')
